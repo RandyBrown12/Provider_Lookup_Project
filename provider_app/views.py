@@ -47,10 +47,11 @@ class ProviderSearchView(APIView):
         result_page = paginator.paginate_queryset(queryset, request)
         serializer = ProviderRecordSerializer(result_page, many=True)
 
-        return render(request, 'search_form.html', {
+        return render(request, 'search_result.html', {
             'results':  {'data': serializer.data}
         })
 
 # initial page render
 def search_form_view(request):
     return render(request, 'search_form.html')
+
