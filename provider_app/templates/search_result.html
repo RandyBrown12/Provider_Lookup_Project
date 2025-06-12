@@ -1,0 +1,176 @@
+<!-- search_result.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Search Results</title>
+  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY"></script>
+   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <style>
+    .material-icons {
+      font-size: 20px;
+      color: black;
+    }
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+    }
+
+    .navbar {
+      background-color: #005fa2;
+      color: white;
+      padding: 16px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .navbar h1 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .navbar a {
+      color: white;
+      margin-left: 20px;
+      text-decoration: none;
+    }
+
+
+
+
+    .container {
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 30px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .search-bar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .search-bar input {
+      padding: 8px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      flex: 1 0 150px;
+    }
+
+    .search-bar button {
+      padding: 10px 20px;
+      background: #2f6df5;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 12px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+
+    th {
+      background-color: #eee;
+    }
+
+    .map-icon {
+      cursor: pointer;
+    }
+
+    .map-icon:hover {
+      filter: brightness(85%);
+    }
+
+    .input-values {
+      font-style: italic;
+      color: #444;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+
+<div class="navbar">
+    <a href="{% url 'search_form' %}">
+    <h1>Medicaid Provider Lookup</h1>
+    </a>
+
+  </div>
+
+
+
+
+  <div class="container">
+    <!-- Re-search form -->
+    <form class="search-bar" method="get" action="{% url 'search-result' %}">
+      <input name="last_name" placeholder="Last Name" value="{{ request.GET.last_name }}" />
+      <input name="first_name" placeholder="First Name" value="{{ request.GET.first_name }}" />
+      <input name="city" placeholder="City" value="{{ request.GET.city }}" />
+      <input name="zip" placeholder="Zip" value="{{ request.GET.zip }}" />
+      <input name="description" placeholder="Description" value="{{ request.GET.description }}" />
+      <button type="submit">Search</button>
+    </form>
+
+    {% if results and results.data %}
+      <p class="input-values">
+        Showing results for: {{ results.data|length }}
+
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Last</th>
+            <th>First</th>
+            <th>Description</th>
+            <th>Phone</th>
+            <th>Primary Address</th>
+            <th>Map</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in results.data %}
+          <tr>
+            <td>{{ r.last_name }}</td>
+            <td>{{ r.first_name }}</td>
+            <td>{{ r.description }}</td>
+            <td>{{ r.phone }}</td>
+            <td>{{ r.city }}, {{ r.zip_code }}</td>
+            <td>
+  <i class="material-icons map-icon"
+     onclick="openMapModal('{{ r.first_name }} {{ r.last_name }}', '{{ r.city }}, {{ r.zip_code }}')">
+     navigation
+  </i>
+</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>No results found.</p>
+    {% endif %}
+  </div>
+
+
+{% include 'map_modal.html' %}
+
+</body>
+</html>

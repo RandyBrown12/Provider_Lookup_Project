@@ -136,17 +136,17 @@
   </style>
 </head>
 <body>
-  <div class="navbar">
+ <div class="navbar">
+    <a href="{% url 'search_form' %}">
     <h1>Medicaid Provider Lookup</h1>
-    <div>
-      <a href="#">Home</a>
-    </div>
+    </a>
+
   </div>
 
   <div class="container">
     <div class="card">
       <h2>Search Medical Provider</h2>
-      <form method="get" action="{% url 'provider-search' %}">
+      <form method="get" action="{% url 'search-result' %}">
         <div class="form-grid">
           <div class="form-group">
             <label for="last_name">Last Name</label>
@@ -186,32 +186,7 @@
       <div class="alert alert-warning">{{ message }}</div>
     {% endif %}
 
-    {% if results and results.data %}
-<table>
-  <thead>
-    <tr>
-      <th>Last</th>
-      <th>First</th>
-      <th>Description</th>
-      <th>Phone</th>
-      <th>Primary Address</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for r in results.data %}
 
-    <tr>
-      <td>{{ r.last_name }}</td>
-      <td>{{ r.first_name }}</td>
-      <td>{{ r.description }}</td>
-      <td>{{ r.phone }}</td>
-      <td>{{ r.city }}, {{ r.zip_code }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
-
-{% endif %}
   </div>
 </body>
 </html>

@@ -1,0 +1,64 @@
+<!-- map_modal.html -->
+
+<div id="mapModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <span class="close" onclick="closeMapModal()">&times;</span>
+    <h2 id="providerName"></h2>
+    <p id="providerAddress"></p>
+    <iframe
+      id="mapFrame"
+      width="100%" height="300" style="border:0;" allowfullscreen loading="lazy">
+    </iframe>
+  </div>
+</div>
+
+<style>
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  padding-top: 60px;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+  background: #fff;
+  margin: auto;
+  padding: 20px;
+  width: 80%;
+  max-width: 600px;
+  border-radius: 8px;
+  position: relative;
+}
+
+.close {
+  position: absolute;
+  top: 10px; right: 15px;
+  font-size: 24px;
+  cursor: pointer;
+}
+</style>
+
+<script>
+function openMapModal(name, address) {
+  document.getElementById('providerName').textContent = name;
+  document.getElementById('providerAddress').textContent = address;
+  document.getElementById('mapFrame').src = `https://www.google.com/maps?q=${encodeURIComponent(address)}&output=embed`;
+  document.getElementById('mapModal').style.display = 'block';
+}
+
+function closeMapModal() {
+  document.getElementById('mapModal').style.display = 'none';
+  document.getElementById('mapFrame').src = '';
+}
+
+window.onclick = function(event) {
+  const modal = document.getElementById('mapModal');
+  if (event.target === modal) {
+    closeMapModal();
+  }
+}
+</script>
