@@ -47,8 +47,8 @@ By default, it starts at http://127.0.0.1:8000
 
 ## Application:
 It contains of 2 main pages:
-    - **Search Page**: The search form consists of inputs for Last Name, First Name, City, State, Zip Code, and Description.
-    - **Result Page**:  It Contains search results for the given parameters along with pagination, sorting as well as navigation capabilities.
+- **Search Page**: The search form consists of inputs for Last Name, First Name, City, State, Zip Code, and Description.
+- **Result Page**:  It Contains search results for the given parameters along with pagination, sorting as well as navigation capabilities.
 
 ## Documentation & API
 
@@ -67,13 +67,13 @@ GET /search_result/?first_name=SCOTT&description=Neph
 
 ## Screenshots
 Search Page:
-<img src="home.png" alt="home page" title="home page" width="500"/>
+- <img src="home.png" alt="home page" title="home page" width="500"/>
 
 Result Page:
-<img src="result.png" alt="result page" title="result page" width="500"/>
+- <img src="result.png" alt="result page" title="result page" width="500"/>
 
 Map Page:
-<img src="map.png" alt="map page" title="map page" width="500"/>
+- <img src="map.png" alt="map page" title="map page" width="500"/>
 
 
 
