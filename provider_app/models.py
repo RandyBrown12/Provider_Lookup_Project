@@ -1,68 +1,67 @@
+# provider_app/models.py
 from django.db import models
 
-# Create your models here.
-import uuid
+class MedicalProvider(models.Model):
+    """
+    Represents a medical provider's basic contact and location information.
 
-class City(models.Model):
-    city_uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    city_id = models.DecimalField(unique=True, max_digits=20, decimal_places=0)
-    city = models.CharField(max_length=255, unique=True)
-
-    def __str__(self):
-        return self.city
-
-
-class ZipCode(models.Model):
-    zip_code_uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    zip_code_id = models.DecimalField(unique=True, max_digits=20, decimal_places=0)
-    zip_code = models.CharField(max_length=20, unique=True)
-
-    def __str__(self):
-        return self.zip_code
-
-
-class Description(models.Model):
-    description_uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    description_id = models.DecimalField(unique=True, max_digits=20, decimal_places=0)
-    description_text = models.CharField(max_length=255, unique=True)
-
-    def __str__(self):
-        return self.description_text
-
-
-class LastName(models.Model):
-    last_name_uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    last_name_id = models.DecimalField(unique=True, max_digits=20, decimal_places=0)
-    last_name = models.CharField(max_length=255, unique=True)
-
-    def __str__(self):
-        return self.last_name
-
-
-class FirstName(models.Model):
-    first_name_uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    first_name_id = models.DecimalField(unique=True, max_digits=20, decimal_places=0)
-    first_name = models.CharField(max_length=255, unique=True)
-
-    def __str__(self):
-        return self.first_name
-
-
-class ProviderRecord(models.Model):
-    provider_uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-
-    description = models.ForeignKey(Description, to_field='description_id', on_delete=models.CASCADE)
-    city = models.ForeignKey(City, to_field='city_id', on_delete=models.CASCADE)
-    first_name = models.ForeignKey(FirstName, to_field='first_name_id', on_delete=models.CASCADE)
-    last_name = models.ForeignKey(LastName, to_field='last_name_id', on_delete=models.CASCADE)
-    zip_code = models.ForeignKey(ZipCode, to_field='zip_code_id', on_delete=models.CASCADE)
-
-    created_at = models.DateTimeField(auto_now_add=True)
+    Fields:
+        id (int): Primary key
+        npi (Decimal): National Provider Identifier (unique, 10-digit)
+        phone_number (str): Contact number
+        first_name (str): Provider's first name
+        last_name (str): Provider's last name
+        mailing_street (str): Street address for mailing
+        mailing_city (str): City of mailing address
+        mailing_state (str): State of mailing address
+        mailing_zip_code (str): ZIP code for mailing address
+    """
+    id = models.AutoField(primary_key=True)
+    npi = models.DecimalField(max_digits=10, decimal_places=0, unique=True)
+    phone_number = models.CharField(max_length=64,blank=True, null=True)
+    first_name = models.CharField(max_length=64, blank=True, null=True)
+    last_name = models.CharField(max_length=64, blank=True, null=True)
+    mailing_street = models.CharField(max_length=224, blank=True, null=True)
+    mailing_city = models.CharField(max_length=64, blank=True, null=True)
+    mailing_state = models.CharField(max_length=64, blank=True, null=True)
+    mailing_zip_code = models.CharField(max_length=25, blank=True, null=True)
 
     class Meta:
-        unique_together = (
-            'city', 'first_name', 'last_name', 'zip_code', 'description'
-        )
+        db_table = "medical_providers"
 
-    def __str__(self):
-        return f"{self.first_name.first_name} {self.last_name.last_name}"
+class Taxonomy(models.Model):
+    """
+    Represents a taxonomy code and its corresponding specialization.
+
+    Fields:
+        id (int): Primary key
+        taxonomy_code (str): Unique taxonomy identifier (e.g., "207Q00000X")
+        taxonomy_specialization (str): Human-readable medical specialization
+    """
+    id = models.AutoField(primary_key=True)
+    taxonomy_code = models.CharField(max_length=10, unique=True)
+    taxonomy_specialization = models.CharField(max_length=255, blank=True, null=True)
+
+    class Meta:
+        db_table = "taxonomies"
+
+class NPIToTaxonomy(models.Model):
+    """
+    Maps a medical provider's NPI to one or more taxonomy codes.
+
+    Fields:
+        id (int): Primary key
+        npi (ForeignKey): Reference to a MedicalProvider
+        taxonomy_code (ForeignKey): Reference to a Taxonomy entry
+
+    Constraints:
+        unique_together: Ensures one provider is not mapped multiple times
+        to the same taxonomy.
+    """
+    id = models.AutoField(primary_key=True)
+    npi = models.ForeignKey(MedicalProvider, to_field='npi', on_delete=models.CASCADE, db_column='npi')
+    taxonomy_code = models.ForeignKey(Taxonomy, to_field='taxonomy_code', on_delete=models.CASCADE, db_column='taxonomy_code')
+
+    class Meta:
+        db_table = "npi_to_taxonomies"
+        unique_together = (('npi', 'taxonomy_code'),)
