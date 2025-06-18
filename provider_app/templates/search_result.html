@@ -8,6 +8,20 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
   <style>
+.page-button {
+  padding: 8px 16px;
+  background-color: #2f6df5;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: bold;
+}
+
+.page-button:hover {
+  background-color: #1c4fd1;
+}
+
+
     .material-icons {
       font-size: 20px;
       color: black;
@@ -125,7 +139,7 @@
 
   {% if results and results.data %}
     <p class="input-values">
-      Showing {{ results.data|length }} result{{ results.data|length|pluralize }}
+      Showing {{ results.count }} result{{ results.count|pluralize }} total
     </p>
 
     <table>
@@ -157,6 +171,41 @@
         {% endfor %}
       </tbody>
     </table>
+<div class="pagination" style="margin-top: 20px; text-align: center;">
+  {% if results.has_previous %}
+    <a href="?page=1{% if request.GET.first_name %}&first_name={{ request.GET.first_name }}{% endif %}
+                       {% if request.GET.last_name %}&last_name={{ request.GET.last_name }}{% endif %}
+                       {% if request.GET.city %}&city={{ request.GET.city }}{% endif %}
+                       {% if request.GET.state %}&state={{ request.GET.state }}{% endif %}
+                       {% if request.GET.zip_code %}&zip_code={{ request.GET.zip_code }}{% endif %}
+                       {% if request.GET.description %}&description={{ request.GET.description }}{% endif %}"
+       class="page-button" style="margin-right: 10px;">First</a>
+
+    <a href="?page={{ results.previous_page_number }}{% if request.GET.first_name %}&first_name={{ request.GET.first_name }}{% endif %}
+                                          {% if request.GET.last_name %}&last_name={{ request.GET.last_name }}{% endif %}
+                                          {% if request.GET.city %}&city={{ request.GET.city }}{% endif %}
+                                          {% if request.GET.state %}&state={{ request.GET.state }}{% endif %}
+                                          {% if request.GET.zip_code %}&zip_code={{ request.GET.zip_code }}{% endif %}
+                                          {% if request.GET.description %}&description={{ request.GET.description }}{% endif %}"
+       class="page-button" style="margin-right: 10px;">Previous</a>
+  {% endif %}
+
+  <span style="font-weight: bold;">Page {{ results.current_page }}</span>
+
+  {% if results.has_next %}
+    <a href="?page={{ results.next_page_number }}{% if request.GET.first_name %}&first_name={{ request.GET.first_name }}{% endif %}
+                                          {% if request.GET.last_name %}&last_name={{ request.GET.last_name }}{% endif %}
+                                          {% if request.GET.city %}&city={{ request.GET.city }}{% endif %}
+                                          {% if request.GET.state %}&state={{ request.GET.state }}{% endif %}
+                                          {% if request.GET.zip_code %}&zip_code={{ request.GET.zip_code }}{% endif %}
+                                          {% if request.GET.description %}&description={{ request.GET.description }}{% endif %}"
+       class="page-button" style="margin-left: 10px;">Next</a>
+  {% endif %}
+</div>
+
+
+
+
   {% else %}
     <p>No results found.</p>
   {% endif %}

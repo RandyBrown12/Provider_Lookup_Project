@@ -5,6 +5,8 @@ from .models import MedicalProvider, Taxonomy, NPIToTaxonomy
 
 from .serializers import ProviderRecordSerializer
 from django.shortcuts import render
+from .pagination import StandardResultsPagination
+
 
 
 class FlexibleProviderSearchView(APIView):
@@ -45,6 +47,7 @@ class FlexibleProviderSearchView(APIView):
             HttpResponse: Rendered HTML page with search results or error message
         """
 
+
         # Get all query params
         first = request.query_params.get('first_name', '').strip()
         last = request.query_params.get('last_name', '').strip()
@@ -84,13 +87,30 @@ class FlexibleProviderSearchView(APIView):
             ).values_list('npi', flat=True)
             queryset = queryset.filter(npi__in=matching_npis)
 
-        serializer = ProviderRecordSerializer(queryset.distinct(), many=True)
-        valid_results = [
-            r for r in serializer.data
-            if all(v != 'no data' for v in r.values())
-        ]
+        queryset = queryset.exclude(first_name__iexact='no data') \
+                           .exclude(last_name__iexact='no data') \
+                           .exclude(phone_number__iexact='no data') \
+                           .exclude(mailing_city__iexact='no data') \
+                           .exclude(mailing_state__iexact='no data') \
+                           .exclude(mailing_zip_code__iexact='no data')
+
+        queryset = queryset.distinct()
+
+        paginator = StandardResultsPagination()
+        page = paginator.paginate_queryset(queryset, request)
+        serializer = ProviderRecordSerializer(page, many=True)
+
+
+
         return render(request, 'search_result.html', {
-            'results': {'data': valid_results}
+            'results': {'data': serializer.data,
+                        'count': paginator.page.paginator.count,
+                        'has_next': paginator.page.has_next(),
+                        'has_previous': paginator.page.has_previous(),
+                        'current_page': paginator.page.number,
+                        'next_page_number': paginator.page.next_page_number() if paginator.page.has_next() else None,
+                        'previous_page_number': paginator.page.previous_page_number() if paginator.page.has_previous() else None,
+}
         })
 
 
