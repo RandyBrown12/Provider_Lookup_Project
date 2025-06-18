@@ -196,3 +196,4 @@ cython_debug/
 .idea
 
 Original_data/
+Clean_data/
