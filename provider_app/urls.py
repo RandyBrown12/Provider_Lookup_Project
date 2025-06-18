@@ -1,11 +1,12 @@
 from django.urls import path
-from .views import ProviderSearchView, search_form_view
-
+from .views import FlexibleProviderSearchView, search_form_view
 urlpatterns = [
-    path('search', ProviderSearchView.as_view(), name='provider-search'),
-
+    # Route for displaying the initial search form page
+    path('search', FlexibleProviderSearchView.as_view(), name='provider-search'),
+    # API-like route for performing flexible provider searches via GET params
     path('', search_form_view,name='search_form'),
-    path("search_result/", ProviderSearchView.as_view(), name="search-result")
+    # Route for rendering the search results (same view reused with template)
+    path("search_result/", FlexibleProviderSearchView.as_view(), name="search-result")
 ]
 
 
