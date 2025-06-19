@@ -159,7 +159,7 @@
           <td>{{ r.last_name }}</td>
           <td>{{ r.first_name }}</td>
           <td>{{ r.description }}</td>
-          <td>{{ r.phone }}</td>
+          <td>({{ r.phone|slice:"0:3" }})-{{ r.phone|slice:"3:6" }}-{{ r.phone|slice:"6:" }}</td>
           <td>{{ r.primary_address }}</td>
           <td>
             <i class="material-icons map-icon"
