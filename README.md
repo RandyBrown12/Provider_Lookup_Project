@@ -19,7 +19,7 @@ Provider Lookup System is a Django-based web application designed to streamline 
 ### 1. Clone the repository
 
 ```
-git clone https://github.com/yourusername/Provider_Lookup_Project.git
+git clone https://github.com/RandyBrown12/Provider_Lookup_Project.git
 cd Provider_Lookup_Project
 ```
 
