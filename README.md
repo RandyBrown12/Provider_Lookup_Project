@@ -40,6 +40,19 @@ uv pip install -r requirements.txt
 
 - Create a database (e.g., provider_db)
 - Update DATABASES in settings.py with your DB credentials inside of an .env file in the main directory.
+- Perform the COPY commands inside the Postgres Shell of your database.
+```
+\COPY MEDICAL_PROVIDERS(NPI, LAST_NAME, FIRST_NAME, MAILING_STREET, MAILING_CITY, MAILING_STATE, MAILING_ZIP_CODE, PHONE_NUMBER) FROM 
+<your_csv_file> WITH (FORMAT csv, HEADER true);
+```
+```
+\COPY TAXONOMIES(TAXONOMY_CODE, TAXONOMY_SPECIALIZATION) FROM 
+<your_csv_file> WITH (FORMAT csv, HEADER true);
+```
+```
+\COPY NPI_TO_TAXONOMIES(NPI, TAXONOMY_CODE) FROM
+<your_csv_file> WITH (FORMAT csv, HEADER true);
+```
 
 ## Quick Start
 
