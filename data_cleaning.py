@@ -1,34 +1,80 @@
 import pandas as pd
-import os
-import glob
 
-def clean_csv_file(input_path, output_path, chunk_size=100000):
-    # Read and process in chunks for large files
-    reader = pd.read_csv(input_path, chunksize=chunk_size, dtype=str, keep_default_na=False)
-    with open(output_path, 'w', encoding='utf-8', newline='') as f_out:
-        first_chunk = True
-        for chunk in reader:
-            # Replace blanks, NaN, or only whitespace with 'no data'
-            chunk = chunk.applymap(lambda x: 'no data' if (pd.isna(x) or str(x).strip() == '') else str(x).strip())
-            # Write header only for the first chunk
-            chunk.to_csv(f_out, index=False, header=first_chunk)
-            first_chunk = False
+# === SETTINGS ===
+input_csv = 'npidata_pfile_20050523-20250608.csv'
+nucc_csv = 'nucc_taxonomy_250.csv'
 
-def clean_all_csvs(input_folder, output_folder):
-    os.makedirs(output_folder, exist_ok=True)
-    csv_files = glob.glob(os.path.join(input_folder, '*.csv'))
-    print(f"Found {len(csv_files)} CSV files to process.")
-    for file in csv_files:
-        filename = os.path.basename(file)
-        output_path = os.path.join(output_folder, filename)
-        print(f"Cleaning {filename} ...")
-        clean_csv_file(file, output_path)
-        print(f"Saved cleaned file to {output_path}")
+output1 = 'npidata_cleaned.csv'
+output2 = 'nucc_taxonomy_processed.csv'
+output3 = 'npi_taxonomy_codes.csv'
 
-if __name__ == "__main__":
-    # Set your input and output folders here
-    input_folder = './Original_data'     # Folder where your CSVs are stored
-    output_folder = './Clean_data'  # Folder to save cleaned CSVs
+# --- Step 1: Read and clean master data ---
+chunk_size = 100000
+columns_to_keep = [
+    'NPI',
+    'Provider Organization Name (Legal Business Name)',
+    'Provider Last Name (Legal Name)',
+    'Provider First Name',
+    'Provider First Line Business Practice Location Address',
+    'Provider Second Line Business Practice Location Address',
+    'Provider Business Practice Location Address City Name',
+    'Provider Business Practice Location Address State Name',
+    'Provider Business Practice Location Address Postal Code',
+    'Provider Business Practice Location Address Telephone Number'
+] + [f'Healthcare Provider Taxonomy Code_{i}' for i in range(1, 16)]
 
-    clean_all_csvs(input_folder, output_folder)
-    print("All files cleaned!")
+chunks = []
+for chunk in pd.read_csv(input_csv, dtype=str, chunksize=chunk_size, keep_default_na=False, encoding='latin-1'):
+    chunk = chunk[[c for c in columns_to_keep if c in chunk.columns]]
+    chunk = chunk.applymap(lambda x: 'no data' if (pd.isna(x) or str(x).strip() == '') else str(x).strip())
+    chunks.append(chunk)
+df_master = pd.concat(chunks, ignore_index=True)
+df_master = df_master.drop_duplicates(subset=['NPI']).reset_index(drop=True)
+print(f"Loaded {len(df_master)} distinct NPI numbers from main file.")
+
+# --- Step 2: File 1 (npidata_cleaned.csv) ---
+df_file1 = df_master.copy()
+df_file1.to_csv(output1, index=False)
+
+# --- Step 3: File 3 (npi_taxonomy_codes.csv, LONG format) ---
+taxonomy_cols = [f'Healthcare Provider Taxonomy Code_{i}' for i in range(1, 16)]
+
+# Melt taxonomy columns into rows
+npi_taxonomy_pairs = (
+    df_master.melt(id_vars=['NPI'], value_vars=taxonomy_cols, var_name='taxonomy_col', value_name='taxonomy_code')
+    .dropna(subset=['taxonomy_code'])
+)
+# Remove blanks or 'no data'
+npi_taxonomy_pairs = npi_taxonomy_pairs[npi_taxonomy_pairs['taxonomy_code'].str.lower() != 'no data']
+npi_taxonomy_pairs = npi_taxonomy_pairs[npi_taxonomy_pairs['taxonomy_code'].str.strip() != '']
+npi_taxonomy_pairs = npi_taxonomy_pairs[['NPI', 'taxonomy_code']].drop_duplicates()
+npi_taxonomy_pairs.to_csv(output3, index=False)
+print("File 3 ready (NPI-taxonomy long format):", output3)
+
+# --- Step 4: File 2 (nucc_taxonomy_processed.csv, Code + Specialization only) ---
+nucc = pd.read_csv(nucc_csv, dtype=str, keep_default_na=False, encoding='latin-1')
+# Find the actual column names in NUCC file (case-insensitive)
+code_col = [col for col in nucc.columns if col.strip().lower() == 'code'][0]
+spec_col = [col for col in nucc.columns if 'specialization' in col.lower()][0]
+columns_nucc_keep = [code_col, spec_col]
+df_file2 = nucc[columns_nucc_keep].copy()
+df_file2 = df_file2.applymap(lambda x: 'no data' if (pd.isna(x) or str(x).strip() == '') else str(x).strip())
+df_file2.to_csv(output2, index=False)
+print("File 2 ready (Code + Specialization):", output2)
+
+# --- Step 5: Show max length for each column and append as last row ---
+
+def append_max_length_row(filename):
+    df = pd.read_csv(filename, dtype=str, keep_default_na=False, encoding='latin-1')
+    maxlen = {col: df[col].astype(str).map(len).max() for col in df.columns}
+    print(f"\nMax length in '{filename}':")
+    for col, l in maxlen.items():
+        print(f"  {col}: {l}")
+    # Add summary row at end
+    summary_row = [str(maxlen[col]) for col in df.columns]
+    df.loc[len(df)] = summary_row
+    df.to_csv(filename, index=False)
+
+append_max_length_row(output1)
+append_max_length_row(output2)
+append_max_length_row(output3)
