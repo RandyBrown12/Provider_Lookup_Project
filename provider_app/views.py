@@ -53,11 +53,11 @@ class FlexibleProviderSearchView(APIView):
         last = request.query_params.get('last_name', '').strip()
         city = request.query_params.get('city', '').strip()
         state = request.query_params.get('state', '').strip()
-        zip_code = request.query_params.get('zip_code', '').strip()
+        zip_code = request.query_params.get('zip', '').strip()
         description = request.query_params.get('description', '').strip()
 
         # At least one field is required
-        if not any([first, last, city, zip_code, description]):
+        if not any([first, last, city, state, zip_code, description]):
             return render(request, 'search_form.html', {
                 'error': "At least one search field is required."
             })

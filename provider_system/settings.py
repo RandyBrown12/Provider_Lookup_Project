@@ -11,11 +11,14 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
-from decouple import config
 import os
+from dotenv import load_dotenv
+from decouple import config
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent  # this points to project root (where manage.py is)
+load_dotenv(BASE_DIR / '.env')  # Load .env from root
+
+print("✅ Loaded DB_HOST:", os.getenv('DB_HOST'))  # Debug print
 
 
 # Quick-start development settings - unsuitable for production
@@ -27,7 +30,7 @@ SECRET_KEY = 'django-insecure-_glvt9u&_&g%kr_ttlr^d&bc#xpo2t8mz!thps9!az6^6cc+a*
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -76,12 +79,12 @@ WSGI_APPLICATION = 'provider_system.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.sqlite3',
+#        'NAME': BASE_DIR / 'db.sqlite3',
+#    }
+#}
 
 
 # Password validation
@@ -129,7 +132,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Database connection settings
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+       'ENGINE': 'django.db.backends.postgresql',
         'NAME': config('DB_NAME'),
         'USER': config('DB_USER'),
         'PASSWORD': config('DB_PASSWORD'),
@@ -137,3 +140,18 @@ DATABASES = {
         'PORT': config('DB_PORT', default='5432'),
     }
 }
+print("🧪 DB HOST from .env:", config('DB_HOST'))
+import os
+print("🧪 Real OS DB_HOST:", os.environ.get("DB_HOST"))
+
+
+#DATABASES = {
+    #'default': {
+        #'ENGINE': 'django.db.backends.postgresql',
+        #'NAME': os.getenv('DB_NAME'),
+        #'USER': os.getenv('DB_USER'),
+        #'PASSWORD': os.getenv('DB_PASSWORD'),
+        #'HOST': os.getenv('DB_HOST'),
+        #'PORT': '5432',
+    #}
+#}
